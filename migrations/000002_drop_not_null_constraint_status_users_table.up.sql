@@ -1,0 +1,1 @@
+ALTER TABLE users ALTER status DROP NOT NULL;
