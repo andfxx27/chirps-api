@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/andfxx27/chirps-api/connection"
+	"github.com/andfxx27/chirps-api/domain/follow"
 	"github.com/andfxx27/chirps-api/domain/user"
 	"github.com/andfxx27/chirps-api/middleware"
 	"github.com/gorilla/mux"
@@ -21,9 +22,11 @@ func NewRouter() *mux.Router {
 	}
 
 	// Initialize repository and handler
+	followRepository := follow.NewRepository(db)
 	userRepository := user.NewRepository(db)
 
 	userHandler := user.NewHandler(userRepository)
+	followHandler := follow.NewHandler(followRepository)
 
 	router := mux.NewRouter()
 	router.Use(middleware.JSONResponseMiddleware)
@@ -32,6 +35,11 @@ func NewRouter() *mux.Router {
 	userSubrouter := router.PathPrefix("/api/users").Subrouter()
 	userSubrouter.HandleFunc("/login", userHandler.Login).Methods(http.MethodPost)
 	userSubrouter.HandleFunc("/register", userHandler.Register).Methods(http.MethodPost)
+
+	userSubrouterWithAuth := router.PathPrefix("/api/users").Subrouter()
+	userSubrouterWithAuth.Use(middleware.AuthMiddleware)
+	userSubrouterWithAuth.HandleFunc("/follows", followHandler.Follow).Methods(http.MethodPost)
+	userSubrouterWithAuth.HandleFunc("/follows", followHandler.Unfollow).Methods(http.MethodDelete)
 
 	log.Println("Server up and running.")
 
