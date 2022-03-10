@@ -1,1 +1,0 @@
-ALTER TABLE users ALTER status SET NOT NULL;
