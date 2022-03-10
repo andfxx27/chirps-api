@@ -36,7 +36,10 @@ func (handler *handler) Login(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO validate request struct
+	if request.Identifier == "" || request.Password == "" {
+		helper.BuildJSONResponse(http.StatusBadRequest, constant.BadRequest, "", rw)
+		return
+	}
 
 	user, err := handler.repo.FindUserByUsernameOrEmail(request.Identifier, request.Identifier)
 	if err != nil && err != pgx.ErrNoRows {
@@ -83,7 +86,10 @@ func (handler *handler) Register(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO validate request struct
+	if request.FirstName == "" || request.Username == "" || request.Email == "" || request.Password == "" {
+		helper.BuildJSONResponse(http.StatusBadRequest, constant.BadRequest, "", rw)
+		return
+	}
 
 	user, err := handler.repo.FindUserByUsernameOrEmail(request.Username, request.Email)
 	if err != nil && err != pgx.ErrNoRows {
@@ -117,5 +123,5 @@ func (handler *handler) Register(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	helper.BuildJSONResponse(http.StatusCreated, constant.Created, "", rw)
+	helper.BuildJSONResponse(http.StatusCreated, "Success register", "", rw)
 }
